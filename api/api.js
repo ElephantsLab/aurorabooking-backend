@@ -7,7 +7,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded())
 const mysql = require("mysql2");
-const { time } = require("console");
+const {nftAbi} = require('../abi/nftContractAbi')
+const { ethers } = require('ethers');
+
+const NODE = "https://mainnet.aurora.dev/";
+
+const nftContractAddress = process.env.NFT_ADDRESS;
+const providerAddress = new ethers.providers.JsonRpcProvider(NODE);
+const nftContract = new ethers.Contract(nftContractAddress, nftAbi, providerAddress);
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -22,10 +29,6 @@ app.listen(PORT, function() {
     console.log(`Connected http on port ${PORT}`);
 })
 
-app.post("/metadata", async function(req, res) {
-    const id = req.body.id;
-} )
-
 app.get('/metadata/:id', async function(req, res){
     try {
         const NFT_id = req.params.id;
@@ -34,6 +37,36 @@ app.get('/metadata/:id', async function(req, res){
     } catch (error) {
         console.log(error)
         return res.status(404).send();
+    }
+})
+app.get('/getUserActiveLots', async function(req, res){
+    try {
+        const timestampt = Math.floor(new Date() / 1000);
+        const date = timeConverter(timestampt);
+        const user = req.query.address
+        const nft_id_list = await nftContract.getOwnedTokensIds(user);
+        console.log(nft_id_list);
+        const user_table_ids = [];
+        const userLots = [];
+
+        for(let nft_id of nft_id_list){
+            nft_id = Number.parseInt(nft_id["_hex"]);
+            const query = `SELECT id from table_orders where nft_id = "${nft_id}" and date = "${date}"`;
+            const result = await connection.query(query);
+            if(result[0]){
+                user_table_ids.push(...result[0])
+            }
+        }
+
+        for(let table_id of user_table_ids){
+            console.log(table_id)
+            const query = `SELECT * from lot_orders where table_order_id = "${table_id.id}"`
+            const result = await connection.query(query);
+            userLots.push(result[0]);
+        }
+        return res.send(userLots);
+    } catch (error) {
+        console.log(error);
     }
 })
 
@@ -63,7 +96,7 @@ app.post("/setNewLot", async function(req, res) {
         const price = req.body.price;
         const date = timeConverter(req.body.date);
         const currentDate = timeConverter(Date.now());//TODO: check table_order time
-        const result = await setNewLot(place_id, table_number, date);
+        const result = await setNewLot(id_in_table_order, price, date);
         if (result === true){
             return res.status(201).send(); 
         } else {

@@ -1,9 +1,10 @@
 
-const {ethers } = require('ethers');
+
 const mysql = require('mysql2');
 require('dotenv').config();
 const {abi} = require('../abi/contractAbi')
 const {nftAbi} = require('../abi/nftContractAbi')
+const {ethers } = require('ethers');
 
 const startBlock = 12345678;
 
