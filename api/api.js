@@ -5,6 +5,7 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded())
 const mysql = require("mysql2");
 
 const connection = mysql.createConnection({
@@ -32,7 +33,26 @@ app.get('/metadata/:id', async function(req, res){
     } catch (error) {
         return res.status(404).send();
     }
-    
+})
+
+app.post("/setNewBooking", async function(req, res) {
+    try {
+        const nft_id = req.body.nft_id;
+        const place_id = req.body.place_id;
+        const table_number = req.body.table_number;
+        const date = req.body.date;
+
+        console.log(req.body);
+        const result = await setNewBooking(nft_id, place_id, table_number, date);
+        if (result === true){
+            return res.status(201).send(); 
+        } else {
+            return res.status(503).send();
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(404).send();
+    }
 })
 
 async function getMetadataByNftId(nftId){
@@ -45,4 +65,15 @@ async function getMetadataByNftId(nftId){
     let getMetadataQueryResult = await connection.query(getMetadataQuery);
     
     return getMetadataQueryResult[0];
+}
+
+async function setNewBooking(nft_id, place_id, table_number, date) {
+    try {
+        const setNewBookingQuery = `INSERT INTO table_orders (place_id, table_number, date, nft_id) VALUES ('${place_id}','${table_number}','${date}','${nft_id}')`
+        await connection.query(setNewBookingQuery);
+        return true
+    } catch (error) {
+        console.log(error);
+        return false
+    }
 }
