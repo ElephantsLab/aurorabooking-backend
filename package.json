@@ -1,0 +1,29 @@
+{
+  "name": "aurorabooking-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ElephantsLab/aurorabooking-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ElephantsLab/aurorabooking-backend/issues"
+  },
+  "homepage": "https://github.com/ElephantsLab/aurorabooking-backend#readme",
+  "dependencies": {
+    "axios": "^0.22.0",
+    "dotenv": "^8.2.0",
+    "ethers": "^5.1.0",
+    "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "log4js": "^6.3.0",
+    "mysql2": "^2.2.5"
+  }
+}
