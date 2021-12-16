@@ -40,7 +40,7 @@ app.post("/setNewBooking", async function(req, res) {
         const nft_id = req.body.nft_id;
         const place_id = req.body.place_id;
         const table_number = req.body.table_number;
-        const date = req.body.date;
+        const date = timeConverter(req.body.date);
 
         console.log(req.body);
         const result = await setNewBooking(nft_id, place_id, table_number, date);
@@ -60,7 +60,7 @@ async function getMetadataByNftId(nftId){
         return;
     }
     
-    let getMetadataQuery = `SELECT * from TABLE where nftId="${nftId.toLowerCase()}"`;
+    let getMetadataQuery = `SELECT * from table_orders where nft_id="${nftId}"`;
 
     let getMetadataQueryResult = await connection.query(getMetadataQuery);
     
@@ -77,3 +77,14 @@ async function setNewBooking(nft_id, place_id, table_number, date) {
         return false
     }
 }
+
+function timeConverter(UNIX_timestamp){
+    const a = new Date(UNIX_timestamp * 1000);
+    const months = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+    const year = a.getFullYear();
+    const month = months[a.getMonth()];
+    const date = a.getDate();
+    
+    const time = year + '-' + month + '-' + date;
+    return time;
+  }
