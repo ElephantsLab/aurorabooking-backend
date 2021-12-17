@@ -40,7 +40,7 @@ app.get('/metadata/:id', async function(req, res){
         const NFT_id = req.params.id;
         const result = await getMetadataByNftId(NFT_id);
         
-        return res.send(result);
+        return res.send(result[0]);
     } catch (error) {
         console.log(error)
         return res.status(404).send();
@@ -159,9 +159,10 @@ async function getMetadataByNftId(nftId){
     const timestamp = Math.floor(new Date() / 1000)
     const currentDate = timeConverter(timestamp);
     let getMetadataQuery = `SELECT * from table_orders where nft_id="${nftId}" and date ="${currentDate}"`;
-
     let getMetadataQueryResult = await connection.query(getMetadataQuery);
-    
+    if(getMetadataQueryResult[0].length){
+        getMetadataQueryResult[0][0]["image"] = `${baseURL}/getQr/${nftId}`;
+    }
     return getMetadataQueryResult[0];
 }
 
