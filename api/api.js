@@ -101,6 +101,35 @@ app.get('/getUserActiveLots', async function(req, res){
         console.log(error);
     }
 })
+
+app.get('/getAllActiveLots', async function(req,res){
+    try {
+        const timestampt = Math.floor(new Date() / 1000);
+        const date = timeConverter(timestampt);
+        const table_lots = [];
+        const userLots = [];
+
+        const query = `SELECT * from lot_orders where date = "${date}"`;
+        const result = await connection.query(query);
+        if(result[0].length){
+            table_lots.push(...result[0])
+        }
+        
+
+        for(let lot of table_lots){
+            const query = `SELECT * from table_orders where id = "${lot.table_order_id}"`
+            const result = await connection.query(query);
+            if(result[0].length){
+                result[0][0]["price"] = lot.price;
+                result[0][0]["lot_id"] = lot.lot_id;
+                userLots.push(...result[0]);
+            }
+        }
+        return res.send(userLots);
+    } catch (error) {
+        console.log(error);
+    }
+})
 app.get('/getUserOrders', async function(req, res){
     try {
         const timestampt = Math.floor(new Date() / 1000);
