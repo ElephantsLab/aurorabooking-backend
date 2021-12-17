@@ -13,6 +13,7 @@ const QRCode = require('qrcode')
 
 const NODE = "https://mainnet.aurora.dev/";
 const baseURL = "https://aurorabooking.net:3000"
+const webSiteUrl = "https://aurorabooking.net"
 
 const nftContractAddress = process.env.NFT_ADDRESS;
 const providerAddress = new ethers.providers.JsonRpcProvider(NODE);
@@ -127,7 +128,7 @@ app.get('/getUserOrders', async function(req, res){
 app.get('/getQr/:id', async function(req, res){
     try {
         const NFT_id = req.params.id;
-        const qrCode = await generateQR(`${baseURL}/metadata/${NFT_id}`);
+        const qrCode = await generateQR(`${webSiteUrl}/order/${NFT_id}`);
         const base64Data = qrCode.replace(/^data:image\/png;base64,/, '');
         const img = Buffer.from(base64Data, 'base64');
         res.append('Content-Type', 'image/png');
