@@ -9,8 +9,10 @@ app.use(express.urlencoded())
 const mysql = require("mysql2");
 const {nftAbi} = require('../abi/nftContractAbi')
 const { ethers } = require('ethers');
+const QRCode = require('qrcode')
 
 const NODE = "https://mainnet.aurora.dev/";
+const baseURL = "https://aurorabooking.net:3000"
 
 const nftContractAddress = process.env.NFT_ADDRESS;
 const providerAddress = new ethers.providers.JsonRpcProvider(NODE);
@@ -25,14 +27,19 @@ const connection = mysql.createConnection({
 
 const PORT = 3000;
 
-app.listen(PORT, function() {
-    console.log(`Connected http on port ${PORT}`);
-})
+https.createServer({
+    key: fs.readFileSync('../../../../../etc/letsencrypt/live/aurorabooking.net/privkey.pem'),
+    cert: fs.readFileSync('../../../../../etc/letsencrypt/live/aurorabooking.net/cert.pem')
+}, app).listen(PORT, function() {
+    console.log("Connected https on ", PORT);
+});
 
+  
 app.get('/metadata/:id', async function(req, res){
     try {
         const NFT_id = req.params.id;
         const result = await getMetadataByNftId(NFT_id);
+        
         return res.send(result);
     } catch (error) {
         console.log(error)
@@ -67,6 +74,43 @@ app.get('/getUserActiveLots', async function(req, res){
         return res.send(userLots);
     } catch (error) {
         console.log(error);
+    }
+})
+app.get('/getUserOrders', async function(req, res){
+    try {
+        const timestampt = Math.floor(new Date() / 1000);
+        const date = timeConverter(timestampt);
+        const user = req.query.address
+        const nft_id_list = await nftContract.getOwnedTokensIds(user);
+        const userOrders = [];
+
+        for(let nft_id of nft_id_list){
+            nft_id = Number.parseInt(nft_id["_hex"]);
+            const query = `SELECT * from table_orders where nft_id = "${nft_id}" and date = "${date}"`;
+            const result = await connection.query(query);
+            if(result[0].length){
+                userOrders.push(result[0][0]);
+            }
+        }
+        return res.send(userOrders);
+    } catch (error) {
+        console.log(error);
+        return res.status(404).send();
+    }
+})
+
+
+app.get('/getQr/:id', async function(req, res){
+    try {
+        const NFT_id = req.params.id;
+        const qrCode = await generateQR(`${baseURL}/metadata/${NFT_id}`);
+        const base64Data = qrCode.replace(/^data:image\/png;base64,/, '');
+        const img = Buffer.from(base64Data, 'base64');
+        res.append('Content-Type', 'image/png');
+        return res.end(img); 
+    } catch (error) {
+        console.log(error)
+        return res.status(404).send(); 
     }
 })
 
@@ -151,4 +195,12 @@ function timeConverter(UNIX_timestamp){
     
     const time = year + '-' + month + '-' + date;
     return time;
+}
+
+const generateQR = async text => {
+    try {
+      return QRCode.toDataURL(text);
+    } catch (err) {
+      console.error(err)
+    }
   }
