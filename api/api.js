@@ -63,7 +63,8 @@ app.get('/metadata/:id', async function(req, res){
 })
 app.get('/getTodaysOrders', async function(req, res){
     try {
-        const result = await getTodaysOrders();
+        const date = req.query.date
+        const result = await getTodaysOrders(date);
         
         return res.send(result);
     } catch (error) {
@@ -177,6 +178,21 @@ app.get('/getQrText/:id', async function(req, res){
         return res.status(404).send(); 
     }
 })
+// app.get('/getAllQrTexts', async function(req, res){
+//     try {
+//         const nft_ids = req.query.nft_ids;
+//         console.log(nft_ids)
+//         let resultArray= []
+//         for(let nftId of nft_ids){
+//             const qrCode = await generateQR(`${webSiteUrl}/order/${nftId}`);
+//             resultArray.push(qrCode);
+//         }
+//         return res.end(resultArray); 
+//     } catch (error) {
+//         console.log(error)
+//         return res.status(404).send(); 
+//     }
+// })
 
 app.post("/setNewBooking", async function(req, res) {
     try {
@@ -242,9 +258,8 @@ async function getMetadataByNftId(nftId){
     return result;
 }
 
-async function getTodaysOrders(){
-    const timestamp = Math.floor(new Date() / 1000)
-    const currentDate = timeConverter(timestamp);
+async function getTodaysOrders(date){
+    const currentDate = timeConverter(date);
     let query = `SELECT * from table_orders where date = "${currentDate}"`;
     const qeuryResult = await connection.query(query);
     return qeuryResult[0]
