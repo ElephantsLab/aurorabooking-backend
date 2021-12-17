@@ -167,6 +167,16 @@ app.get('/getQr/:id', async function(req, res){
         return res.status(404).send(); 
     }
 })
+app.get('/getQrText/:id', async function(req, res){
+    try {
+        const NFT_id = req.params.id;
+        const qrCode = await generateQR(`${webSiteUrl}/order/${NFT_id}`);
+        return res.end(qrCode); 
+    } catch (error) {
+        console.log(error)
+        return res.status(404).send(); 
+    }
+})
 
 app.post("/setNewBooking", async function(req, res) {
     try {
@@ -187,14 +197,24 @@ app.post("/setNewBooking", async function(req, res) {
         return res.status(404).send();
     }
 })
-
+app.delete('/deleteLot', async function(req, res){
+    try {
+        const lot_id = req.body.lot_id;
+        await deleteLot(lot_id)
+        res.status(200).send();
+    } catch (error) {
+        console.log(error);
+        res.status(404).send();
+    }
+})
 app.post("/setNewLot", async function(req, res) {
     try {
         const id_in_table_order = req.body.id;
         const price = req.body.price;
+        const lot_id = req.body.lot_id; 
         const date = timeConverter(req.body.date);
         const currentDate = timeConverter(Date.now());//TODO: check table_order time
-        const result = await setNewLot(id_in_table_order, price, date);
+        const result = await setNewLot(id_in_table_order, price, date, lot_id);
         if (result === true){
             return res.status(201).send(); 
         } else {
@@ -240,9 +260,19 @@ async function setNewBooking(nft_id, place_id, table_number, date) {
         return false
     }
 }
-async function setNewLot(order_id, price, date) {
+
+async function deleteLot(lot_id){
     try {
-        const setNewLotQuery = `INSERT INTO lot_orders (table_order_id, price, date) VALUES ('${order_id}','${price}','${date}')`
+        const query = `DELETE FROM lot_orders WHERE lot_id = "${lot_id}"`;
+        await connection.query(query);
+        return true;
+    } catch (error) {
+        console.log(error);
+    }
+}
+async function setNewLot(order_id, price, date, lot_id) {
+    try {
+        const setNewLotQuery = `INSERT INTO lot_orders (table_order_id, lot_id, price, date) VALUES ('${order_id}', '${lot_id}','${price}','${date}')`
         await connection.query(setNewLotQuery);
         return true
     } catch (error) {
