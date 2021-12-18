@@ -12,7 +12,7 @@ const { ethers } = require('ethers');
 const QRCode = require('qrcode')
 
 const NODE = "https://mainnet.aurora.dev/";
-const baseURL = "https://aurorabooking.net:3000"
+const baseURL = "https://aurorabooking.net/api"
 const webSiteUrl = "https://aurorabooking.net"
 
 const nftContractAddress = process.env.NFT_ADDRESS;
@@ -30,24 +30,20 @@ const PORT = 3000;
 
 const places = [
 
-    {"NAME": "Restaurant 1", "ID": 0, "TABLES": 10, "IMG": ""},
-    {"NAME": "Restaurant 2", "ID": 1, "TABLES": 12, "IMG": ""},
-    {"NAME": "Restaurant 3", "ID": 2, "TABLES": 9, "IMG": ""},
-    {"NAME": "Restaurant 4", "ID": 3, "TABLES": 7, "IMG": ""},
-    {"NAME": "Restaurant 5", "ID": 4, "TABLES": 20, "IMG": ""},
-    {"NAME": "Restaurant 6", "ID": 5, "TABLES": 13, "IMG": ""},
-    {"NAME": "Restaurant 7", "ID": 6, "TABLES": 15, "IMG": ""},
-    {"NAME": "Restaurant 8", "ID": 7, "TABLES": 10, "IMG": ""},
-    {"NAME": "Restaurant 9", "ID": 8, "TABLES": 12, "IMG": ""},
-    {"NAME": "Restaurant 10", "ID": 9, "TABLES": 14,"IMG": ""}
+    {"NAME": "Aurora gastronomy", "ID": 0, "TABLES": 10, "IMG": "https://aurorabooking.net/img/cardImage1.e6d75e12.png", "STARS": ["five"], "TOWN": "KIEV"},
+    {"NAME": "Near foods", "ID": 1, "TABLES": 12, "IMG": "https://aurorabooking.net/img/cardImage2.ee971047.png", "STARS": ["five"], "TOWN": "LONDON"}
 ]
 
-https.createServer({
-    key: fs.readFileSync('../../../../../etc/letsencrypt/live/aurorabooking.net/privkey.pem'),
-    cert: fs.readFileSync('../../../../../etc/letsencrypt/live/aurorabooking.net/cert.pem')
-}, app).listen(PORT, function() {
-    console.log("Connected https on ", PORT);
-});
+// https.createServer({
+//     key: fs.readFileSync('../../../../../etc/letsencrypt/live/aurorabooking.net/privkey.pem'),
+//     cert: fs.readFileSync('../../../../../etc/letsencrypt/live/aurorabooking.net/cert.pem')
+// }, app).listen(PORT, function() {
+//     console.log("Connected https on ", PORT);
+// });
+
+app.listen(PORT, function() {
+    console.log(`Connected http on port ${PORT}`);
+})
 
   
 app.get('/metadata/:id', async function(req, res){
