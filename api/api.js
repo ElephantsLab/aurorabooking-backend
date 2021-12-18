@@ -129,15 +129,15 @@ app.get('/getAllActiveLots', async function(req,res){
 })
 app.get('/getUserOrders', async function(req, res){
     try {
-        const timestampt = Math.floor(new Date() / 1000);
-        const date = timeConverter(timestampt);
+        // const timestampt = Math.floor(new Date() / 1000);
+        // const date = timeConverter(timestampt);
         const user = req.query.address
         const nft_id_list = await nftContract.getOwnedTokensIds(user);
         const userOrders = [];
 
         for(let nft_id of nft_id_list){
             nft_id = Number.parseInt(nft_id["_hex"]);
-            const query = `SELECT * from table_orders where nft_id = "${nft_id}" and date = "${date}"`;
+            const query = `SELECT * from table_orders where nft_id = "${nft_id}"`;
             const result = await connection.query(query);
             if(result[0].length){
                 userOrders.push(result[0][0]);
